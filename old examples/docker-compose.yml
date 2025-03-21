@@ -1,0 +1,57 @@
+version: "3.9"
+ 
+services:
+ 
+  zabbix-db:
+    image: postgres:15
+    container_name: zabbix-postgres
+    hostname: zabbix-postgres
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+      POSTGRES_ROOT_USER: root
+      POSTGRES_ROOT_PASSWORD: rootzabbix
+      POSTGRES_DATABASE: zabbix
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+    networks:
+      - network-zabbix
+      
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:ubuntu-latest
+    container_name: zabbix-server
+    hostname: zabbix-server
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+      DB_SERVER_HOST: zabbix-postgres
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbixpass
+    networks:
+      - network-zabbix
+    depends_on:
+      - zabbix-db
+ 
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:ubuntu-latest
+    container_name: zabbix-web
+    hostname: zabbix-web
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+      DB_SERVER_HOST: zabbix-postgres
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbixpass
+      ZBX_SERVER_HOST: zabbix-server
+      PHP_TZ: "Europe/Moscow"
+    ports:
+      - 8080:8080
+    networks:
+      - default
+    depends_on:
+      - zabbix-db
+      - zabbix-server
+ 
+networks:
+  network-zabbix:
+    driver: bridge
