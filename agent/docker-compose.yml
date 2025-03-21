@@ -1,1 +1,12 @@
+version: '3.5'
 
+services:
+  zabbix-agent:
+    image: zabbix/zabbix-agent:latest
+    container_name: zabbix-agent
+    restart: unless-stopped
+    environment:
+      ZBX_HOSTNAME: zabbix-server
+      ZBX_SERVER_HOST: <IP_вашего_Zabbix-сервера> 
+    ports:
+      - "10050:10050" 
